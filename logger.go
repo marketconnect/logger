@@ -31,12 +31,11 @@ func NewTelegramLogger(botToken string, chatID string, serviceName string, logge
 	}
 }
 
-// getCallerInfo возвращает имя файла и номер строки, откуда был вызван метод
 func getCallerInfo() string {
-	for i := 2; i < 10; i++ { // Ищем уровень стека вызова, который находится вне пакета logger
+	for i := 2; i < 10; i++ {
 		if pc, file, line, ok := runtime.Caller(i); ok {
 			fn := runtime.FuncForPC(pc)
-			// Пропускаем вызовы из пакета logger
+
 			if !strings.Contains(file, "logger") {
 				return fmt.Sprintf("%s:%d (%s)", file, line, fn.Name())
 			}
@@ -46,7 +45,7 @@ func getCallerInfo() string {
 }
 
 func (t *TelegramLogger) Info(args ...interface{}) {
-	callerInfo := getCallerInfo() // Получаем информацию о файле и строке
+	callerInfo := getCallerInfo()
 	message := fmt.Sprint(args...)
 	logMessage := fmt.Sprintf("INFO: %s [%s]", message, callerInfo)
 	t.logger.Info(logMessage)
@@ -56,7 +55,7 @@ func (t *TelegramLogger) Info(args ...interface{}) {
 }
 
 func (t *TelegramLogger) Error(args ...interface{}) {
-	callerInfo := getCallerInfo() // Получаем информацию о файле и строке
+	callerInfo := getCallerInfo()
 	message := fmt.Sprint(args...)
 	logMessage := fmt.Sprintf("ERROR: %s [%s]", message, callerInfo)
 	t.logger.Error(logMessage)
@@ -66,7 +65,7 @@ func (t *TelegramLogger) Error(args ...interface{}) {
 }
 
 func (t *TelegramLogger) Fatal(args ...interface{}) {
-	callerInfo := getCallerInfo() // Получаем информацию о файле и строке
+	callerInfo := getCallerInfo()
 	message := fmt.Sprint(args...)
 	logMessage := fmt.Sprintf("FATAL: %s [%s]", message, callerInfo)
 	t.logger.Error(logMessage)
