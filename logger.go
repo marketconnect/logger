@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strings"
 )
 
 type Logger interface {
@@ -32,11 +33,14 @@ func NewTelegramLogger(botToken string, chatID string, serviceName string, logge
 
 // getCallerInfo возвращает имя файла и номер строки, откуда был вызван метод
 func getCallerInfo() string {
-	// runtime.Caller(1) вернет информацию о вызове в текущей функции
-	// runtime.Caller(2) вернет информацию о вызове в вызывающей функции (уровень выше)
-	if pc, file, line, ok := runtime.Caller(2); ok {
-		fn := runtime.FuncForPC(pc) // Получаем имя функции
-		return fmt.Sprintf("%s:%d (%s)", file, line, fn.Name())
+	for i := 2; i < 10; i++ { // Ищем уровень стека вызова, который находится вне пакета logger
+		if pc, file, line, ok := runtime.Caller(i); ok {
+			fn := runtime.FuncForPC(pc)
+			// Пропускаем вызовы из пакета logger
+			if !strings.Contains(file, "logger") {
+				return fmt.Sprintf("%s:%d (%s)", file, line, fn.Name())
+			}
+		}
 	}
 	return "неизвестный файл:0"
 }
