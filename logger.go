@@ -46,7 +46,7 @@ func getCallerInfo() string {
 
 func (t *TelegramLogger) Info(args ...interface{}) {
 	callerInfo := getCallerInfo()
-	message := fmt.Sprint(args...)
+	message := formatMessage(args...)
 	logMessage := fmt.Sprintf("INFO: %s [%s]", message, callerInfo)
 	t.logger.Info(logMessage)
 	if err := t.SendToTelegram("ℹ️ " + "<b>" + t.serviceName + "</b>: " + message + " [" + callerInfo + "]"); err != nil {
@@ -56,7 +56,7 @@ func (t *TelegramLogger) Info(args ...interface{}) {
 
 func (t *TelegramLogger) Error(args ...interface{}) {
 	callerInfo := getCallerInfo()
-	message := fmt.Sprint(args...)
+	message := formatMessage(args...)
 	logMessage := fmt.Sprintf("ERROR: %s [%s]", message, callerInfo)
 	t.logger.Error(logMessage)
 	if err := t.SendToTelegram("❗ " + "<b>" + t.serviceName + "</b>: " + message + " [" + callerInfo + "]"); err != nil {
@@ -66,7 +66,7 @@ func (t *TelegramLogger) Error(args ...interface{}) {
 
 func (t *TelegramLogger) Fatal(args ...interface{}) {
 	callerInfo := getCallerInfo()
-	message := fmt.Sprint(args...)
+	message := formatMessage(args...)
 	logMessage := fmt.Sprintf("FATAL: %s [%s]", message, callerInfo)
 	t.logger.Error(logMessage)
 	if err := t.SendToTelegram("🚨 " + "<b>" + t.serviceName + "</b>: " + message + " [" + callerInfo + "]"); err != nil {
@@ -94,4 +94,16 @@ func (t *TelegramLogger) SendToTelegram(message string) error {
 	}
 
 	return nil
+}
+
+func formatMessage(args ...interface{}) string {
+	if len(args) == 0 {
+		return ""
+	}
+
+	if format, ok := args[0].(string); ok && strings.Contains(format, "%") {
+		return fmt.Sprintf(format, args[1:]...)
+	}
+
+	return fmt.Sprint(args...)
 }
